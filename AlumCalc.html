@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>System Scaffold Aluminum Deck Height</title>
+<style>
+body {
+font-family: Arial, sans-serif;
+margin: 20px;
+padding: 0;
+background-color: #f4f4f4;
+}
+h1 {
+color: #333;
+}
+label, input, select, button {
+margin-bottom: 15px;
+}
+label {
+display: inline-block;
+width: 180px;
+font-weight: bold;
+}
+button {
+padding: 10px 20px;
+background-color: #007BFF;
+color: white;
+border: none;
+cursor: pointer;
+}
+button:hover {
+background-color: #0056b3;
+}
+p {
+font-size: 18px;
+}
+</style>
+</head>
+<body>
+<h1>System Scaffold Aluminum Deck Height</h1>
+<label for="targetFeet">Target Height (feet):</label>
+<input type="number" id="targetFeet"><br>
+<label for="targetInches">Target Height (inches):</label>
+<input type="number" id="targetInches"><br>
+<label for="targetFraction">Target Height (fraction):</label>
+<select id="targetFraction">
+<option value="0/1">0</option>
+<option value="1/16">1/16</option>
+<option value="1/8">1/8</option>
+<option value="3/16">3/16</option>
+<option value="1/4">1/4</option>
+<option value="5/16">5/16</option>
+<option value="3/8">3/8</option>
+<option value="7/16">7/16</option>
+<option value="1/2">1/2</option>
+<option value="9/16">9/16</option>
+<option value="5/8">5/8</option>
+<option value="11/16">11/16</option>
+<option value="3/4">3/4</option>
+<option value="13/16">13/16</option>
+<option value="7/8">7/8</option>
+<option value="15/16">15/16</option>
+</select><br>
+<button onclick="calculatePoint()">Calculate</button>
+<p id="result"></p>
+<p id="slideDistance"></p>
+<script>
+function toFeetInchesAndFractions(inches) {
+const feet = Math.floor(inches / 12);
+const remainingInches = Math.floor(inches % 12);
+let remaining16ths = Math.round((inches % 1) * 16);
+let fraction = '';
+if (remaining16ths % 8 === 0) {
+fraction = `${remaining16ths / 16}`;
+} else if (remaining16ths % 4 === 0) {
+fraction = `${remaining16ths / 4}/4`;
+} else if (remaining16ths % 2 === 0) {
+fraction = `${remaining16ths / 2}/8`;
+} else {
+fraction = `${remaining16ths}/16`;
+}
+return `${feet}' ${remainingInches}" ${fraction}"`;
+}
+function calculatePoint() {
+const targetFeet = parseInt(document.getElementById("targetFeet").value) || 0;
+const targetInches = parseInt(document.getElementById("targetInches").value) || 0;
+const targetFraction = document.getElementById("targetFraction").value || "0/1";
+const [numerator, denominator] = targetFraction.split("/").map(Number);
+const targetHeight = (targetFeet * 12) + targetInches + (numerator / denominator);
+const resultElement = document.getElementById("result");
+const slideDistanceElement = document.getElementById("slideDistance");
+const maxSlideDistance = 14.0;
+const starterCollar = 7 + 5 / 16;
+let incrementInches = (1 * 12 + 7) + 11 / 16;
+let firstPointInches = (1 * 12 + 7) + 5 / 8;
+let point = 0;
+let closestHeight = firstPointInches;
+let useStarterCollar = false;
+for(let currentInches = firstPointInches; currentInches <= targetHeight; currentInches += incrementInches) {
+point++;
+closestHeight = currentInches;
+}
+let slideDistance = targetHeight - closestHeight;
+if (slideDistance > maxSlideDistance) {
+useStarterCollar = true;
+closestHeight += starterCollar;
+slideDistance = targetHeight - closestHeight;
+}
+if (slideDistance < 0) {
+resultElement.innerHTML = `Cannot reach ${toFeetInchesAndFractions(targetHeight)} even with a starter collar.`;
+return;
+}
+slideDistanceElement.innerHTML = `Set jack height to ${toFeetInchesAndFractions(slideDistance)} to align aluminum deck on ring ${point}. `;
+
+if (useStarterCollar) {
+slideDistanceElement.innerHTML += " (Using starter collar)";
+}
+}
+</script>
+</body>
+</html>
